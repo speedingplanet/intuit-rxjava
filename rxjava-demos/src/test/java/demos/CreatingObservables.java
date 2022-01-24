@@ -18,13 +18,12 @@ import static org.junit.Assert.assertEquals;
 public class CreatingObservables {
 
   private Integer[] n;
-  private List<Integer> nList;
   private Observable<Integer> oList;
 
   @Before
   public void beforeAllTests() {
     n = new Integer[]{ 1, 2, 3, 4, 5 };
-    nList = Arrays.asList(n);
+    List<Integer> nList = Arrays.asList(n);
     oList = Observable.fromArray(n);
   }
 
@@ -144,7 +143,7 @@ public class CreatingObservables {
 
   }
 
-  // Suppliers throw Throwables, more flexible than Exceptions, and are part of the
+  // RxJava Suppliers throw Throwables, more flexible than Exceptions, and are part of the
   // RxJava API. Do not confuse it with java.util.function.Supplier, which cannot
   // throw anything
   @SuppressWarnings("divzero")

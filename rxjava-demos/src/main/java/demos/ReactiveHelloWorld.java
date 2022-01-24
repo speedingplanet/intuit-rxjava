@@ -6,10 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 public class ReactiveHelloWorld {
 
-  public static void main(String[] args) throws InterruptedException {
-    // intervalObservable();
+  public static void main(String[] args) {
+    intervalObservable();
     // sleepingObservable();
-    completedObservable();
+    // completedObservable();
   }
 
   public static void completedObservable() {
@@ -39,15 +39,5 @@ public class ReactiveHelloWorld {
                       error -> System.out.println("Something went wrong: " + error),
                       () -> System.out.println("All finished"));
     System.out.println("After subscribe");
-  }
-
-  public static void firstObservable() {
-    Integer[] numbersStandard = { 0, 1, 2, 3, 4 };
-    Observable<Integer> numbers = Observable.range(0, 5);
-
-    // numbers.subscribe(onNext, onError, onComplete)
-    numbers.subscribe(value -> System.out.println("Value: " + value),
-                      error -> System.out.println("Something went wrong: " + error),
-                      () -> System.out.println("All finished"));
   }
 }
