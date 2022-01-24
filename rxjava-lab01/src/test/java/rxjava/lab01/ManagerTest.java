@@ -1,11 +1,6 @@
 package rxjava.lab01;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +8,7 @@ import java.util.List;
 public class ManagerTest {
   Employee emp1, emp2, emp3, emp4, emp5, emp6, emp7;
   Manager mgr1, mgr2;
-  List<Employee> mgr1Team, mgr2Team, duplicateMgr1Team, shuffledMgr1Team;
+  List<Employee> mgr1Team, mgr2Team;
 
   @Before()
   public void setUp() {
