@@ -1,6 +1,8 @@
 package rxjava.lab01;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class Manager extends Employee {
   private List<Employee> team;
