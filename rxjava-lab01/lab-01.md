@@ -30,6 +30,13 @@ Open `Manager`. Update the following:
 
 ## Part 3
 
+Use TestObserver to write better tests for Manager. Specifically:
+* Test whether there was a subscription to the Observable from `getTeam`
+* Test whether that Observable returned the right values in the right order
+* Test whether that Observable completed
+
+## Part 4
+
 Let's watch for changes. Open `Manager`. 
 
 * Implement code such that we can watch when Managers add or remove team members
