@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class EmployeeTest {
   Employee emp1, emp2, emp3;
@@ -21,19 +22,14 @@ public class EmployeeTest {
   public void testGetFirstName() {
     emp1.getFirstName().subscribe(firstName -> {
       assertEquals(firstName, "John");
-      // This kind of breaks things
-      // assertEquals(firstName, "Angela");
     });
   }
 
   @Test
   public void betterTestGetFirstName() {
-    var data = new ArrayList<String>();
+    List<String> data = new ArrayList<>();
     emp1.getFirstName().subscribe(data::add);
     assertEquals("John", data.get(0));
-
-    // Fails more nicely
-    // assertEquals("Angela", data.get(0));
   }
 
 }

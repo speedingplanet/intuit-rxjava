@@ -11,8 +11,7 @@ import java.util.List;
 public class DepartmentTest {
   Employee emp1, emp2, emp3, emp4, emp5, emp6, emp7;
   Manager mgr1, mgr2;
-  List<Employee> mgr1Team, mgr2Team, duplicateMgr1Team, shuffledMgr1Team;
-  Department department;
+  List<Employee> mgr1Team, mgr2Team;
 
   @Before()
   public void setUp() {
