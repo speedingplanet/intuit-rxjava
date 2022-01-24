@@ -31,9 +31,9 @@ Open `Manager`. Update the following:
 ## Part 3
 
 Use TestObserver to write better tests for Manager. Specifically:
-* Test whether there was a subscription to the Observable from `getTeam`
+* Test whether the `getTeam` Observable completed
+* Test whether the `getTeam` Observable had any errors
 * Test whether that Observable returned the right values in the right order
-* Test whether that Observable completed
 
 ## Part 4
 
