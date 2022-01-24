@@ -35,7 +35,11 @@ public class TestingObservables {
     int value = 10;
     Observable<Integer> o = Observable.just(value);
     TestObserver<Integer> testObserver = o.test();
+
+    // What's in this Observable?
     testObserver.assertValue(value);
+
+    // What state is the Observable in?
     testObserver.assertComplete();
     testObserver.assertNoErrors();
   }
@@ -47,7 +51,12 @@ public class TestingObservables {
     System.out.println("= Demonstrating TestObserver, from an array");
     System.out.println("======================================================");
     TestObserver<Integer> testObserver = oList.test();
-    testObserver.assertValues(n);
+    testObserver.assertValues(1, 2, 3, 4, 5); // implicitly Complete after values
+    testObserver.assertValueCount(n.length);
+    testObserver.assertComplete();
+
+    // testObserver.assertError(someError)
+    // testObserver.assertNotComplete(); // Would fail, if assertValues() is true
   }
 
   @Ignore
