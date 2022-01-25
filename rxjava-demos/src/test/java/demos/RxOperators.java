@@ -129,48 +129,19 @@ public class RxOperators {
 
   @Ignore
   @Test
-  public void mergeTest() {
+  public void doOnNextTest() {
+    // For side effects
     System.out.println("======================================================");
-    System.out.println("= merge and concat operators");
+    System.out.println("= doOnNext operator");
     System.out.println("======================================================");
-    Observable<String> a =
-      Observable.just("aardvark", "abscond", "alpha", "apples");
-    Observable<String> b = Observable.just("banana", "bat", "beta", "bottle");
+    Observable.range(0, 10)
+              .doOnNext(i -> System.out.printf("Initial doOnNext: %d%n", i))
+              .filter(i -> i % 2 == 0)
+              .doOnNext(i -> System.out.printf("doOnNext after filter%n"))
+              .map(i -> i * 2)
+              .doOnNext(i -> System.out.printf("doOnNext after map%n"))
+              .blockingSubscribe(System.out::println);
 
-    // Merge can interleave results, but won't always (see next test)
-    Observable<String> merged = Observable.merge(a, b);
-    // Concat appends the results of b to a, requires a to complete first
-    Observable<String> concatenated = Observable.concat(a, b);
-    System.out.println("Merged: ");
-    merged.subscribe(System.out::println, System.err::println);
-    System.out.println("Concatenated: ");
-    concatenated.subscribe(System.out::println, System.err::println);
-  }
-
-  @Ignore
-  @Test
-  public void mergeConcatTest() {
-    System.out.println("======================================================");
-    System.out.println("= merge and concat operators, async");
-    System.out.println("======================================================");
-    Observable<Long> range10 = Observable.intervalRange(0, 10, 0, 100, TimeUnit.MILLISECONDS);
-    Observable<Long> range20 = Observable.intervalRange(0, 10, 0, 100, TimeUnit.MILLISECONDS);
-
-    // Merge can interleave results, but won't always
-    // Observable<Long> merged = Observable.merge(range10, range20);
-    // Concat appends the results of range10 and range20, requires range10 to complete first
-    Observable<Long> concatenated = Observable.concat(range20, range10);
-    // System.out.print("Merged: ");
-    // merged.blockingSubscribe(v -> System.out.printf("%d, ", v), System.err::println);
-    System.out.println();
-    long start, finish;
-    start = System.currentTimeMillis();
-    System.out.println("Concatenated starting at " + start);
-    concatenated.blockingSubscribe(v -> System.out.printf("%d, ", v), System.err::println);
-    finish = System.currentTimeMillis();
-    System.out.println();
-    System.out.println("Concatenated ending at " + finish);
-    System.out.println("Difference: " + (finish - start));
   }
 
   @Ignore
@@ -289,22 +260,5 @@ public class RxOperators {
       Observable.zip(a, b, (a1, b1) -> String.format("%s / %s%n", a1, b1));
 
     zipped.subscribe(System.out::print, System.err::println);
-  }
-
-  @Ignore
-  @Test
-  public void doOnNextTest() {
-    // For side effects
-    System.out.println("======================================================");
-    System.out.println("= doOnNext operator");
-    System.out.println("======================================================");
-    Observable.range(0, 10)
-              .doOnNext(i -> System.out.printf("Initial doOnNext: %d%n", i))
-              .filter(i -> i % 2 == 0)
-              .doOnNext(i -> System.out.printf("doOnNext after filter%n"))
-              .map(i -> i * 2)
-              .doOnNext(i -> System.out.printf("doOnNext after map%n"))
-              .blockingSubscribe(System.out::println);
-
   }
 }
