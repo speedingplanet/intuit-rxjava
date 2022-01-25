@@ -38,19 +38,4 @@ public class DepartmentTest {
     itDepartment.addManager(mgr2);
   }
 
-  @Test
-  public void testLab2Part2_1() {
-    Observable<Manager> managers = itDepartment.getManagers();
-    TestObserver<Manager> observer = managers.test();
-    observer.assertValueCount(2);
-    observer.assertValues(mgr1, mgr2);
-  }
-
-  @Test
-  public void testLab2Part2_2() {
-    Observable<Employee> employees = itDepartment.getEmployees();
-    TestObserver<Employee> observer = employees.test();
-    observer.assertValueCount(mgr1Team.size() + mgr2Team.size());
-    observer.assertResult(emp1, emp2, emp3, emp4, emp5, emp6);
-  }
 }
