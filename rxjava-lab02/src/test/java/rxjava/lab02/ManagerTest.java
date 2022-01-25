@@ -31,7 +31,7 @@ public class ManagerTest {
     emp7 = new Employee("Jenny", "Quantum", 80000);
 
     mgr1Team = new ArrayList<>(Arrays.asList(emp1, emp2, emp3));
-    mgr2Team = new ArrayList<>(Arrays.asList(emp2, emp3, emp4));
+    mgr2Team = new ArrayList<>(Arrays.asList(emp4, emp5, emp6));
 
     mgr1 = new Manager("Steve", "Topdog", 100000, mgr1Team);
     mgr2 = new Manager("Jenny", "Bigcheese", 100000, mgr2Team);

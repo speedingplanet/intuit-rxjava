@@ -6,9 +6,9 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public class Employee {
-  private final String firstName;
-  private final String lastName;
-  private final Integer salary;
+  protected final String firstName;
+  protected final String lastName;
+  protected final Integer salary;
 
   public Employee(String firstName, String lastName, Integer salary) {
     Objects.requireNonNull(firstName, "First Name is null");
