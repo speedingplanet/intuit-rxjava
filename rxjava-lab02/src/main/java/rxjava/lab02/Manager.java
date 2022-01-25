@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.core.ObservableSource;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.observers.TestObserver;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 
 import java.util.*;
@@ -51,6 +52,10 @@ public class Manager extends Employee implements ObservableSource<Employee> {
     } else {
       return false;
     }
+  }
+
+  protected TestObserver<Employee> getTrackerObserver() {
+    return teamTracker.test();
   }
 
   @Override
