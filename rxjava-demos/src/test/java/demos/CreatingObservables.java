@@ -18,13 +18,12 @@ import static org.junit.Assert.assertEquals;
 public class CreatingObservables {
 
   private Integer[] n;
-  private Observable<Integer> oList;
+  List<Integer> nList;
 
   @Before
   public void beforeAllTests() {
     n = new Integer[]{ 1, 2, 3, 4, 5 };
-    List<Integer> nList = Arrays.asList(n);
-    oList = Observable.fromArray(n);
+    nList = Arrays.asList(n);
   }
 
   @Ignore
@@ -61,6 +60,7 @@ public class CreatingObservables {
     System.out.println("= Demonstrating Observable.fromIterable()");
     System.out.println("======================================================");
 
+    Observable<Integer> oList = Observable.fromIterable(Arrays.asList(n));
     oList.subscribe(value -> System.out.printf("value is %d%n", value),
                     error -> System.out.printf("Something went wrong!%n"),
                     () -> System.out.printf("testFromIterable finished%n"));
@@ -73,6 +73,7 @@ public class CreatingObservables {
     System.out.println("= Get all the items in an observable as an iterable");
     System.out.println("======================================================");
 
+    Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
     Iterable<Integer> iter = oList.blockingIterable();
     for (Integer i : iter) {
       System.out.printf("Integer value: %d%n", i);
@@ -86,6 +87,8 @@ public class CreatingObservables {
     System.out.println("=========================================================");
     System.out.println("= Testing a Single from an Observable");
     System.out.println("=========================================================");
+
+    Observable<Integer> oList = Observable.fromIterable(Arrays.asList(n));
     Single<Integer> first = oList.first(0); // requires a default item
     assertEquals(first.blockingGet(), n[0]);
     first.subscribe(value -> System.out.println("Value: " + value),
@@ -100,8 +103,17 @@ public class CreatingObservables {
     System.out.println("============================================================");
     System.out.println("= Testing a Maybe from an Observable");
     System.out.println("============================================================");
+    Observable<Integer> oList = Observable.fromIterable(Arrays.asList(n));
     Maybe<Integer> first = oList.firstElement();
-    assertEquals(first.blockingGet(), n[0]);
+    first.subscribe(v -> {
+                      System.out.println("Maybe should print this once: " + v);
+                    },
+                    error -> {
+                      System.err.println("Maybe could go here, if something goes wrong");
+                    }, () -> {
+        System.out.println("Finished with no value");
+      });
+    // assertEquals(first.blockingGet(), n[0]);
   }
 
   @Ignore
@@ -133,7 +145,6 @@ public class CreatingObservables {
       return names;
     });
     System.out.println("4) Observable created");
-
 
     System.out.println("5) Before subscribing");
     cold.subscribe(v -> System.out.printf("Value: %s%n", v),
