@@ -10,35 +10,36 @@ public class ObserveOnSubscribeOn {
   @Test
   public void observeOnTest() throws InterruptedException {
     System.out.println("======================================================");
-    System.out.println("= Demonstrating Observable.fromCallable()");
+    System.out.println("= observeOn(thread)");
     System.out.println("======================================================");
     Observable.just("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
+              // .subscribeOn(Schedulers.single()) // Otherwise [main]
               .map(i -> {
-                System.out.printf("\t[%s] %s %n",
+                System.out.printf("\tMap 1: [%s] %s %n",
                                   Thread.currentThread()
                                         .getName(),
                                   i);
-                return i + "{main}";
+                return i + " {main}";
               })
               // All future ops on the computation thread, including subscribe
               .observeOn(Schedulers.computation())
-              // .observeOn(Schedulers.io())
               .map(i -> {
-                System.out.printf("\t[%s] %s %n",
+                System.out.printf("\tMap 2: [%s] %s %n",
                                   Thread.currentThread()
                                         .getName(),
                                   i);
                 // return i + "{computation}";
-                return i + "{io}";
+                return i + " {io}";
               })
+              .observeOn(Schedulers.io())
               .map(i -> {
-                System.out.printf("\t[%s] (still) %s %n",
+                System.out.printf("\tMap 3: [%s] %s %n",
                                   Thread.currentThread()
                                         .getName(),
                                   i);
                 return i;
               })
-              .subscribe(v -> System.out.printf("OUTPUT: [%s] %s%n",
+              .subscribe(v -> System.out.printf("Subscription: [%s] %s%n",
                                                 Thread.currentThread()
                                                       .getName(),
                                                 v), System.err::println);
@@ -84,29 +85,29 @@ public class ObserveOnSubscribeOn {
   @Test
   public void subscribeOnWithSubjectTest() throws InterruptedException {
     System.out.println("===== subscribeOn with Subject =====");
-    Observable<String>  o1 = Observable.just("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
-                       // Only subscribe will happen on this thread
-                       .map(i -> {
-                         System.out.printf("\t[%s] %s %n",
-                                           Thread.currentThread()
-                                                 .getName(),
-                                           i);
-                         return i + "{main}";
-                       })
-                       .map(i -> {
-                         System.out.printf("\t[%s] %s %n",
-                                           Thread.currentThread()
-                                                 .getName(),
-                                           i);
-                         return i + "{second map}";
-                       })
-                       .map(i -> {
-                         System.out.printf("\t[%s] (still) %s %n",
-                                           Thread.currentThread()
-                                                 .getName(),
-                                           i);
-                         return i;
-                       });
+    Observable<String> o1 = Observable.just("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
+                                      // Only subscribe will happen on this thread
+                                      .map(i -> {
+                                        System.out.printf("\t[%s] %s %n",
+                                                          Thread.currentThread()
+                                                                .getName(),
+                                                          i);
+                                        return i + "{main}";
+                                      })
+                                      .map(i -> {
+                                        System.out.printf("\t[%s] %s %n",
+                                                          Thread.currentThread()
+                                                                .getName(),
+                                                          i);
+                                        return i + "{second map}";
+                                      })
+                                      .map(i -> {
+                                        System.out.printf("\t[%s] (still) %s %n",
+                                                          Thread.currentThread()
+                                                                .getName(),
+                                                          i);
+                                        return i;
+                                      });
     ReplaySubject<String> subject = ReplaySubject.<String>create();
     o1.subscribe(subject);
     subject.subscribeOn(Schedulers.io())
