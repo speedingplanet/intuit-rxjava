@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,9 +36,9 @@ public class CreatingObservables {
     String name = "John";
     Observable<String> o = Observable.just(name, "Dan", "Tim", "Andreina", "Hector", "Andres");
 
-    o.subscribe(v -> System.out.printf("Value: %s%n", v),  // onNext
-                e -> System.out.printf("Ouch!%n"),          // onError
-                () -> System.out.printf("Finished%n"));     // onComplete
+    o.subscribe(v -> System.out.printf("Value: %s%n", v),   // onNext
+                e -> System.out.printf("Something went wrong!%n"),          // onError
+                () -> System.out.printf("testFromJust() finished%n"));     // onComplete
   }
 
   @Ignore
@@ -50,7 +51,7 @@ public class CreatingObservables {
 
     numbers.subscribe(value -> System.out.printf("value is %d%n", value),
                       error -> System.out.printf("Something went wrong!%n"),
-                      () -> System.out.printf("testFromArray finished%n"));
+                      () -> System.out.printf("testFromArray() finished%n"));
   }
 
   @Ignore
@@ -60,10 +61,10 @@ public class CreatingObservables {
     System.out.println("= Demonstrating Observable.fromIterable()");
     System.out.println("======================================================");
 
-    Observable<Integer> oList = Observable.fromIterable(Arrays.asList(n));
+    Observable<Integer> oList = Observable.fromIterable(nList);
     oList.subscribe(value -> System.out.printf("value is %d%n", value),
                     error -> System.out.printf("Something went wrong!%n"),
-                    () -> System.out.printf("testFromIterable finished%n"));
+                    () -> System.out.printf("testFromIterable() finished%n"));
   }
 
   @Ignore
@@ -88,102 +89,177 @@ public class CreatingObservables {
     System.out.println("= Testing a Single from an Observable");
     System.out.println("=========================================================");
 
-    Observable<Integer> oList = Observable.fromIterable(Arrays.asList(n));
+    Observable<Integer> oList = Observable.fromIterable(nList);
     Single<Integer> first = oList.first(0); // requires a default item
     assertEquals(first.blockingGet(), n[0]);
+
+    // Literally does not take a third argument
     first.subscribe(value -> System.out.println("Value: " + value),
                     error -> System.out.println("Problem: " + error)
-    );
+                   );
   }
 
   @Ignore
   @Test
   public void testObservableMaybe() {
-    // Maybes emit a single value and then complete, or an error
+    // Maybes emit a single value, an error, or if no value, just completes
     System.out.println("============================================================");
     System.out.println("= Testing a Maybe from an Observable");
     System.out.println("============================================================");
-    Observable<Integer> oList = Observable.fromIterable(Arrays.asList(n));
+    Observable<Integer> oList = Observable.fromIterable(nList);
     Maybe<Integer> first = oList.firstElement();
+
+    // isEmpty() returns a Single (not a boolean)
+    System.out.printf("Is the Maybe empty? %b%n",
+                      first.isEmpty()
+                           .blockingGet());
     first.subscribe(v -> {
                       System.out.println("Maybe should print this once: " + v);
                     },
                     error -> {
                       System.err.println("Maybe could go here, if something goes wrong");
-                    }, () -> {
-        System.out.println("Finished with no value");
-      });
-    // assertEquals(first.blockingGet(), n[0]);
+                    },
+                    () -> {
+                      System.out.println("Maybe prints this if there is no value");
+                    });
+  }
+
+  @Ignore
+  @Test
+  public void testObservableMaybeEmpty() {
+    // Maybes emit a single value, an error, or if no value, just completes
+    System.out.println("============================================================");
+    System.out.println("= Testing an empty Maybe from an Observable");
+    System.out.println("============================================================");
+    Observable<Integer> oEmpty = Observable.empty();
+    Maybe<Integer> first = oEmpty.firstElement();
+
+    // isEmpty() returns a Single (not a boolean)
+    System.out.printf("Is the Maybe empty? %b%n",
+                      first.isEmpty()
+                           .blockingGet());
+    first.subscribe(v -> {
+                      System.out.println("Maybe should not print this: " + v);
+                    },
+                    error -> {
+                      System.err.println("Maybe could go here, if something goes wrong");
+                    },
+                    () -> {
+                      System.out.println("Maybe should print this since it's empty");
+                    });
   }
 
   @Ignore
   @Test
   public void testSupplier() {
+    /*
+     * Critically, this is a RxJava Supplier http://reactivex.io/RxJava/3
+     * .x/javadoc/io/reactivex/rxjava3/functions/Supplier.html
+     * NOT a Java SE Supplier. RxJava Suppliers can throw Throwables
+     */
     System.out.println("======================================================");
     System.out.println("= Demonstrating Observable.fromSupplier()");
     System.out.println("======================================================");
     Observable<Long> o = Observable.fromSupplier(System::currentTimeMillis);
     o.subscribe(value -> System.out.printf("Value: %d%n", value),
                 error -> System.out.printf("Something went wrong%n"),
-                () -> System.out.println("testSupplier finished"));
-  }
-
-  @Ignore
-  @Test
-  public void testFromCallable() {
-    System.out.println("======================================================");
-    System.out.println("= Demonstrating Observable.fromCallable()");
-    System.out.println("======================================================");
-    System.out.println("1) Defining the Observable");
-    Observable<ArrayList<String>> cold = Observable.fromCallable(() -> {
-      System.out.println("2) Callable is running");
-      ArrayList<String> names = new ArrayList<>();
-      names.add("John");
-      names.add("Dan");
-      names.add("Tim");
-      System.out.println("3) Callable finished");
-      return names;
-    });
-    System.out.println("4) Observable created");
-
-    System.out.println("5) Before subscribing");
-    cold.subscribe(v -> System.out.printf("Value: %s%n", v),
-                   e -> System.out.printf("Ouch!%n"),
-                   () -> System.out.printf("Finished%n"));
-    System.out.println("6) After subscribing");
-
+                () -> System.out.println("testSupplier() finished"));
   }
 
   // RxJava Suppliers throw Throwables, more flexible than Exceptions, and are part of the
   // RxJava API. Do not confuse it with java.util.function.Supplier, which cannot
   // throw anything
-  @SuppressWarnings("divzero")
+  @SuppressWarnings("rawtypes")
   @Ignore
   @Test
   public void supplierGoneWrong() {
     System.out.println("=============================================================");
     System.out.println("= Demonstrating Observable.supplierGoneWrong(), with error");
     System.out.println("=============================================================");
-    Observable<Long> o = Observable.fromSupplier(() -> 10L / 0);
+    Observable<Long> o = Observable.fromSupplier(() -> {
+      if (4 % 2 == 1) {
+        return 1L;
+      } else {
+        throw new Error("Very bad at math");
+      }
+    });
+    o.subscribe(value -> System.out.printf("Value: %d%n", value),
+                error -> System.out.printf("As expected: something went wrong: %s%n", error),
+                () -> System.out.println("testSupplier() finished"));
+
+    java.util.function.Supplier supplierThatThrows = () -> {
+      if (4 % 2 == 1) {
+        return 1L;
+      } else {
+        throw new Error("Very bad at math");
+      }
+    };
+
+    // This won't work, because supplierThatThrows is of the wrong type
+    // Observable<Long> o2 = Observable.fromSupplier(supplierThatThrows);
+  }
+
+  @Ignore
+  @Test
+  public void testFromCallable() {
+    /*
+     * Callables are Java SE standard, but can only throw Exceptions, not Throwables
+     */
+    System.out.println("======================================================");
+    System.out.println("= Demonstrating Observable.fromCallable()");
+    System.out.println("======================================================");
+    Callable<Integer> getNumber = () -> 10;
+    Observable<Integer> o = Observable.fromCallable(getNumber);
     o.subscribe(value -> System.out.printf("Value: %d%n", value),
                 error -> System.out.printf("Something went wrong: %s%n", error),
-                () -> System.out.println("testSupplier finished"));
+                () -> System.out.println("testFromCallable() finished"));
   }
 
   // Callables throw Exceptions, and are part of java.util.concurrent, which implies
-  // running something in a separate thread
+  // (but does not require) running something in a separate thread
   @SuppressWarnings("divzero")
   @Test
   @Ignore
   public void callableGoneWrong() {
-    System.out.println("==========================================================");
-    System.out.println("= Demonstrating Observable.fromCallable(), with an error ");
-    System.out.println("==========================================================");
+    System.out.println("=============================================================");
+    System.out.println("= Demonstrating Observable.fromCallable(), with an exception ");
+    System.out.println("=============================================================");
     Observable<Integer> bad = Observable.fromCallable(() -> 10 / 0);
 
     bad.subscribe(v -> System.out.printf("Never happens%n"),
-                  e -> System.out.printf("Error should happen%n"),
+                  e -> System.out.printf("Exception, which should happen%n"),
                   () -> System.out.printf("Complete, never happens.%n"));
+  }
+
+  @Ignore
+  @Test
+  public void testFromCallableAsDeferred() {
+    /*
+     * Callables are great for deferring expensive calculations
+     */
+    System.out.println("======================================================");
+    System.out.println("= Demonstrating Observable.fromCallable()");
+    System.out.println("======================================================");
+    Callable<ArrayList<String>> deferred = () -> {
+      System.out.println("Callable is running");
+      ArrayList<String> names = new ArrayList<>();
+      names.add("John");
+      names.add("Dan");
+      names.add("Tim");
+      System.out.println("Callable finished");
+      return names;
+    };
+
+    System.out.println("Creating the Observable");
+    Observable<ArrayList<String>> cold = Observable.fromCallable(deferred);
+    System.out.println("Observable created");
+
+    System.out.println("Before subscribing");
+    cold.subscribe(value -> System.out.printf("Value: %s%n", value),
+                   error -> System.out.printf("Something went wrong: %s%n", error),
+                   () -> System.out.printf("testFromCallableAsDeferred() Finished%n"));
+    System.out.println("After subscribing");
+
   }
 
 }
