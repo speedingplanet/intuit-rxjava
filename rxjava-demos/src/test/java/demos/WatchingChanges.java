@@ -17,11 +17,14 @@ public class WatchingChanges {
     System.out.println("= Creating a Subject");
     System.out.println("======================================================");
     Car honda = new Car("Honda", "Civic");
-    honda.pubSubscribe(speed -> System.out.printf("Speed is now %d%n", speed),
-                    error -> System.out.printf("Something went wrong%n"),
-                    () -> System.out.println("Finished."));
+    honda.pubSubscribe(speed -> System.out.printf("1. Speed is now %d%n", speed),
+                    error -> System.out.printf("1. Something went wrong%n"),
+                    () -> System.out.println("1. Finished."));
     honda.accelerate(55);
     honda.brake(10);
+    honda.pubSubscribe(speed -> System.out.printf("2. Speed is now %d%n", speed),
+                       error -> System.out.printf("2. Something went wrong%n"),
+                       () -> System.out.println("2. Finished."));
     honda.accelerate(20);
     honda.brake(60);
   }
@@ -89,14 +92,21 @@ public class WatchingChanges {
     System.out.println("Done");
   }
 
-
   private class Car {
     private String make;
     private String model;
     private int speed = 0;
+
+    // Emits as you go along, no past, no most recent
     private PublishSubject<Integer> pubTracker;
+
+    // Emits all events from the start, regardless of when we subscribe
     private ReplaySubject<Integer> replayTracker;
+
+    // Emits most recent, continues
     private BehaviorSubject<Integer> beTracker;
+
+    // Emits last value after completion
     private AsyncSubject<Integer> asyncTracker;
 
     Car(String make, String model) {
