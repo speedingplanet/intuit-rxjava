@@ -23,12 +23,10 @@ public class AggregateOperators {
     System.out.println("======================================================");
     System.out.println("= collect operator");
     System.out.println("======================================================");
-    Observable<Integer>  numbers = Observable.range(0, 10);
+    Observable<Integer> numbers = Observable.range(0, 10);
     numbers.collect(() -> new ArrayList<Integer>(), ArrayList::add)
            .subscribe(list -> {
-             for (int n : list) {
-               System.out.println(n);
-             }
+             System.out.printf("There are %d items in the list%n", list.size());
            });
   }
 
@@ -38,7 +36,7 @@ public class AggregateOperators {
     System.out.println("======================================================");
     System.out.println("= scan operator");
     System.out.println("======================================================");
-    Observable<Integer>  numbers = Observable.range(0, 10);
+    Observable<Integer> numbers = Observable.range(0, 10);
     numbers.scan((total, current) -> total + current)
       .subscribe(System.out::println);
   }

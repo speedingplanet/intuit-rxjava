@@ -13,13 +13,12 @@ public class ObserveOnSubscribeOn {
     System.out.println("= observeOn(thread)");
     System.out.println("======================================================");
     Observable.just("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
-              // .subscribeOn(Schedulers.single()) // Otherwise [main]
               .map(i -> {
                 System.out.printf("\tMap 1: [%s] %s %n",
                                   Thread.currentThread()
                                         .getName(),
                                   i);
-                return i + " {main}";
+                return i + " {map 1}";
               })
               // All future ops on the computation thread, including subscribe
               .observeOn(Schedulers.computation())
@@ -29,7 +28,7 @@ public class ObserveOnSubscribeOn {
                                         .getName(),
                                   i);
                 // return i + "{computation}";
-                return i + " {io}";
+                return i + " {map 2}";
               })
               .observeOn(Schedulers.io())
               .map(i -> {
@@ -39,6 +38,7 @@ public class ObserveOnSubscribeOn {
                                   i);
                 return i;
               })
+              .subscribeOn(Schedulers.single()) // Otherwise [main]
               .subscribe(v -> System.out.printf("Subscription: [%s] %s%n",
                                                 Thread.currentThread()
                                                       .getName(),

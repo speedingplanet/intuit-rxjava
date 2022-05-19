@@ -29,8 +29,9 @@ public class ErrorHandlers {
                throw new Exception("Divisible by five!");
              }
            })
-           .doOnError(e -> System.err.println("Caught in doOnError..."))
-           .subscribe(System.out::println, System.err::println);
+           .doOnError(e -> System.err.println("doOnError: " + e))
+           .subscribe(System.out::println,
+                      error -> System.err.println("subscribe.onError: " + error));
   }
 
   @Test

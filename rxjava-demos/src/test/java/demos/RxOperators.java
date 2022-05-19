@@ -2,6 +2,7 @@ package demos;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableTransformer;
+import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class RxOperators {
     Observable<Integer> o1 = Observable.just(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     System.out.print("Take the first 5: ");
     Observable<Integer> o2 = o1.take(5);
-    // .forEach(v -> System.out.printf("forEach: %d%n", v));
+    // o2.forEach(v -> System.out.printf("forEach: %d%n", v));
     o2.subscribe(v -> System.out.printf("%d ", v));
     System.out.println();
 
@@ -41,6 +42,17 @@ public class RxOperators {
     System.out.print("Taking items while their value is less than three: ");
     o1.takeWhile(v -> v < 3)
       .forEach(v -> System.out.printf("%d ", v));
+  }
+
+  @Test
+  public void coldOperators() {
+    Observable<Integer> o1 = Observable.range(1, 100);
+    Observable<Integer> o2 = o1.take(50);
+    Observable<Integer> o3 = o2.take(25);
+    Observable<Integer> o4 = o3.take(12);
+    Observable<Integer> o5 = o4.take(6);
+
+    o5.subscribe(System.out::println);
   }
 
   @Ignore
@@ -64,7 +76,7 @@ public class RxOperators {
     Observable<Long> numbers = Observable.intervalRange(0, 10, 0, 500, TimeUnit.MILLISECONDS);
     Observable<Long> evenNumbers = numbers.filter(x -> x % 2 == 0);
     evenNumbers.subscribe(e -> System.out.printf("Even number: %d%n", e));
-    Thread.sleep(2500); // Should see the first 5 numbers, and then exit
+    Thread.sleep(2500); // Should see the first 3 even numbers, and then exit
   }
 
   @Ignore
@@ -81,7 +93,7 @@ public class RxOperators {
 
   @Ignore
   @Test
-  public void mapAndFilter() {
+  public void mapThenFilter() {
     // Process everything, filter results
     System.out.println("======================================================");
     System.out.println("= map, then filter");
@@ -144,6 +156,17 @@ public class RxOperators {
 
   }
 
+  @Test
+  public void sortedTest() {
+    System.out.println("======================================================");
+    System.out.println("= sorted operator");
+    System.out.println("======================================================");
+
+    Observable<String> o1 = Observable.just("John", "Dan", "Tim", "Andreina", "Ted", "Patrick");
+    Observable<String> sortedO1 = o1.sorted(); // Or provide a custom Comparator
+    sortedO1.forEach(System.out::println);
+  }
+
   @Ignore
   @Test
   public void flatMapTest() {
@@ -165,12 +188,26 @@ public class RxOperators {
 
     Observable<String> keys = Observable.just("A", "B", "C");
 
+    // Inconvenient
+    // Observable<Observable<String>> results = keys.map(wordList::get);
+
     // Might interleave, where concatMap will guarantee ordering
     keys.flatMap(key -> {
           System.out.printf("*** %s ***%n", key);
-          return wordList.get(key);
+          return wordList.get(key); // without flatMap, this would be an Observable of words
         }) //  ["aardvark", "abscond", "alpha", "apples"], and following
         .subscribe(System.out::println);
+
+  }
+
+  @Test
+  public void observerAndObservableTest() {
+    Observable<Integer> numbers = Observable.range(1, 100)
+                                            .filter(x -> x % 2 == 0)
+                                            .map(x -> x * 2);
+    TestObserver<Integer> observer = TestObserver.create();
+    numbers.subscribe(observer);
+
   }
 
   @Ignore
