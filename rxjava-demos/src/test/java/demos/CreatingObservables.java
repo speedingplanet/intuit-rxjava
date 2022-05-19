@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,9 +37,23 @@ public class CreatingObservables {
     String name = "John";
     Observable<String> o = Observable.just(name, "Dan", "Tim", "Andreina", "Hector", "Andres");
 
-    o.subscribe(v -> System.out.printf("Value: %s%n", v),   // onNext
-                e -> System.out.printf("Something went wrong!%n"),          // onError
-                () -> System.out.printf("testFromJust() finished%n"));     // onComplete
+    o.subscribe(v -> System.out.printf("Value: %s%n", v),               // onNext
+                e -> System.out.printf("Something went wrong!%n"),      // onError
+                () -> System.out.printf("testFromJust() finished%n"));  // onComplete
+  }
+
+  @Ignore
+  @Test
+  public void testFromRange() {
+    System.out.println("======================================================");
+    System.out.println("= Demonstrating Observable.range(int start, int count)");
+    System.out.println("======================================================");
+
+    // Ending values are non-inclusive
+    Observable<Integer> oRange = Observable.range(10, 35);
+    oRange.subscribe(value -> System.out.printf("Value: %d%n", value),
+                     error -> System.err.println("Something went wrong"),
+                     () -> System.out.printf("Range completed"));
   }
 
   @Ignore
@@ -75,6 +90,7 @@ public class CreatingObservables {
     System.out.println("======================================================");
 
     Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
+    // Iterable<Integer> iter = oList.blockingIterable();
     Iterable<Integer> iter = oList.blockingIterable();
     for (Integer i : iter) {
       System.out.printf("Integer value: %d%n", i);
@@ -83,14 +99,47 @@ public class CreatingObservables {
 
   @Ignore
   @Test
+  public void testFromInterval() {
+    System.out.println("======================================================");
+    System.out.println("= An Observable that emits at intervals");
+    System.out.println("======================================================");
+
+    Observable<Long> infinite = Observable.interval(100, 250, TimeUnit.MILLISECONDS);
+
+    // Plain subscribe() will exit because it runs on a daemon thread
+    // infinite.subscribe(value -> System.out.printf("Current value: %d%n", value),
+    infinite.blockingSubscribe(value -> System.out.printf("Current value: %d%n", value),
+                       error -> System.err.println("Something went wrong! "),
+                       () -> System.out.printf("onComplete will never run%n"));
+  }
+
+  @Ignore
+  @Test
+  public void testFromIntervalRange() throws InterruptedException {
+    System.out.println("==============================================================");
+    System.out.println("= An Observable that emits at intervals for a range of values");
+    System.out.println("==============================================================");
+
+    Observable<Long> slowTen = Observable.intervalRange(1, 10, 100, 250, TimeUnit.MILLISECONDS);
+    Thread.sleep(4000); // No effect because the observable is cold
+    slowTen.subscribe(value -> System.out.printf("Current value: %d%n", value),
+                               error -> System.err.println("Something went wrong! "),
+                               () -> System.out.printf("Finished with all ten values"));
+    Thread.sleep(4000); // Gives subscribe() time to run
+
+  }
+
+  @Ignore
+  @Test
   public void testObservableSingle() {
-    // Singles emit one value or an error, and never complete
+    // Singles emit one value or an error, and never completes
     System.out.println("=========================================================");
     System.out.println("= Testing a Single from an Observable");
     System.out.println("=========================================================");
 
     Observable<Integer> oList = Observable.fromIterable(nList);
     Single<Integer> first = oList.first(0); // requires a default item
+    System.out.printf("Value as a one-liner: %d%n", oList.first(0).blockingGet());
     assertEquals(first.blockingGet(), n[0]);
 
     // Literally does not take a third argument
