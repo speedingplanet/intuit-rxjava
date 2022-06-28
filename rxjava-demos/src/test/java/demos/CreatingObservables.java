@@ -35,6 +35,7 @@ public class CreatingObservables {
     System.out.println("= Demonstrating Observable.just()");
     System.out.println("======================================================");
     String name = "John";
+    // emits the args (up to 10 args allowed)
     Observable<String> o = Observable.just(name, "Dan", "Tim", "Andreina", "Hector", "Andres");
 
     o.subscribe(v -> System.out.printf("Value: %s%n", v),               // onNext
