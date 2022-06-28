@@ -14,7 +14,8 @@ public class FirstObservable {
 
     // subscribe() assigns a Subscriber to the Publisher
     // Three methods: onNext, onError, onComplete
-    // onError and onComplete are terminators (finish the Publisher)
+    // onError and onComplete are terminators (they run when the Publisher
+    // finishes unsuccessfully or successfully)
     numbers.subscribe(i -> {
       System.out.println("Received value: " + i);
     }, error -> {
@@ -24,8 +25,9 @@ public class FirstObservable {
       System.out.println("Publisher has finished");
     });
 
-    CustomObserver co = new CustomObserver();
-    numbers.subscribe(co);
+    // We can write a Subscriber class if we'd like
+    // CustomObserver co = new CustomObserver();
+    // numbers.subscribe(co);
   }
 
   // Observers are Subscribers
