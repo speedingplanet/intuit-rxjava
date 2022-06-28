@@ -37,7 +37,13 @@ public class TestingObservables {
     TestObserver<Integer> testObserver = o.test();
 
     // What's in this Observable?
+    // Direct value
     testObserver.assertValue(value);
+
+    // Using a Predicate
+    testObserver.assertValue(result -> result > 5);
+    testObserver.assertValue(result -> result == value);
+
 
     // What state is the Observable in?
     testObserver.assertComplete();
@@ -54,6 +60,11 @@ public class TestingObservables {
     testObserver.assertValues(1, 2, 3, 4, 5); // implicitly Complete after values
     testObserver.assertValueCount(n.length);
     testObserver.assertComplete();
+
+    testObserver.assertValueAt(2, 3);
+
+    List<Integer> values = testObserver.values();
+    assertEquals(nList, values);
 
     // testObserver.assertError(someError)
     // testObserver.assertNotComplete(); // Would fail, if assertValues() is true
