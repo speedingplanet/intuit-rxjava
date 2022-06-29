@@ -49,8 +49,11 @@ public class Manager extends Employee {
   }
 
   public void addTeamMember(Employee employee) {
-    team.add(employee);
-    teamTracker.onNext(new EmployeeAddition(employee));
+    // change to employee set instead?
+    if (!team.contains(employee)) {
+      team.add(employee);
+      teamTracker.onNext(new EmployeeAddition(employee));
+    }
   }
 
   public void removeTeamMember(Employee employee) {
