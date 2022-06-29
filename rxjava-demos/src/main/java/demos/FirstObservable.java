@@ -35,7 +35,7 @@ public class FirstObservable {
 
     @Override
     public void onSubscribe(@NonNull Disposable d) {
-
+      System.out.println("Successfully subscribed");
     }
 
     @Override
@@ -45,13 +45,13 @@ public class FirstObservable {
 
     @Override
     public void onError(@NonNull Throwable e) {
-      System.err.println("CustomObserver.onError: " + e);
+      System.err.println("CustomObserver.onError(): " + e);
 
     }
 
     @Override
     public void onComplete() {
-      System.out.println("CustomObserver.onComplete: finished");
+      System.out.println("CustomObserver.onComplete(): finished");
     }
   }
 }
