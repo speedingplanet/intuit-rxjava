@@ -19,16 +19,16 @@ public class Employee {
     this.salary = salary;
   }
 
-  public String getFirstName() {
-    return firstName;
+  public Observable<String> getFirstName() {
+    return Observable.just(firstName);
   }
 
-  public String getLastName() {
-    return lastName;
+  public Observable<String> getLastName() {
+    return Observable.just(lastName);
   }
 
-  public Integer getSalary() {
-    return salary;
+  public Observable<Integer> getSalary() {
+    return Observable.just(salary);
   }
 
   @Override

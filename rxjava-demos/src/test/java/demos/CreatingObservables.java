@@ -92,6 +92,7 @@ public class CreatingObservables {
 
     Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
     // Iterable<Integer> iter = oList.blockingIterable();
+    // blocking iterable means that the thread will wait until onComplete/onError happens (terminator)
     Iterable<Integer> iter = oList.blockingIterable();
     for (Integer i : iter) {
       System.out.printf("Integer value: %d%n", i);
@@ -107,8 +108,10 @@ public class CreatingObservables {
 
     Observable<Long> infinite = Observable.interval(100, 250, TimeUnit.MILLISECONDS);
 
-    // Plain subscribe() will exit because it runs on a daemon thread
+    // Plain subscribe() will exit because it runs on a daemon thread (main thread won't wait on daemons if time for main to exit)
     // infinite.subscribe(value -> System.out.printf("Current value: %d%n", value),
+
+    // blockingSubscribe will block the main thread (or thread we are on) instead
     infinite.blockingSubscribe(value -> System.out.printf("Current value: %d%n", value),
                        error -> System.err.println("Something went wrong! "),
                        () -> System.out.printf("onComplete will never run%n"));
