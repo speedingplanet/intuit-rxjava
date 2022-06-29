@@ -2,6 +2,8 @@
 
 ## Part 1
 
+All of the below in `Manager.java`.
+
 1. Create an observable that prints only the first two employees under each of the managers. 
 2. Concatenate all the employees together into one observable by getting them from their respective managers.
 3. Print employees while their salaries are less than 70000. No sorting, as soon as you hit an employee with a
@@ -17,17 +19,17 @@ constructor takes only the name of the Department. Add an `addManager` method to
 Create `getManagers` to return the managers as an Observable. Add a `getEmployees` that uses 
 `flatMap` to go over the Managers and return an Observable of all current Employees. 
 
-1. In DepartmentTest.java, write a test to ensure that you can get the complete list of Managers
-2. Still in DepartmentTest.java, write a test to ensure that you can get the complete list of Employees
+1. In `DepartmentTest.java`, write a test to ensure that you can get the complete list of Managers
+2. Still in `DepartmentTest.java`, write a test to ensure that you can get the complete list of Employees
 
 ## Part 3
 
-1. Add a test to ManagerTest.java which fetches the employees. From the `Employee` `Observable`, 
+1. Add a test to `ManagerTest.java` which fetches the employees. From the `Employee` `Observable`, 
    create a new Observable which throws an error if an Employee's salary is greater than 60000. 
-2. Using the code from 1. above, have the new Observable complete if an error is thrown
-3. Using the code from 1. above, have the Observable return a dummy employee instead of
+2. Using the code from 1, above, have the new Observable complete if an error is thrown
+3. Using the code from 1, above, have the Observable return a dummy employee instead of
    an Exception
-4. Using the code from 1. above, have the Observable skip over the exception
+4. Using the code from 1, above, have the Observable skip over the exception
    (Yes, filtering would be more efficient here, but we're testing errors!)
 
 ## Part 4
