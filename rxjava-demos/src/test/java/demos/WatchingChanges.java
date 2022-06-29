@@ -32,19 +32,19 @@ public class WatchingChanges {
   @Test
   public void multipleSubscribers() {
     System.out.println("======================================================");
-    System.out.println("= Multiple subscribers");
+    System.out.println("= Replay all values to all subscribers");
     System.out.println("======================================================");
 
     Car honda = new Car("Honda", "Civic");
-    honda.replaySubscribe(speed -> System.out.printf("S1: Speed is now %d%n", speed),
-                    error -> System.out.printf("S1: Something went wrong%n"),
-                    () -> System.out.println("S1: Finished."));
+    honda.replaySubscribe(speed -> System.out.printf("1. Speed is now %d%n", speed),
+                    error -> System.out.printf("1. Something went wrong%n"),
+                    () -> System.out.println("1. Finished."));
     honda.accelerate(55);
     honda.brake(10);
 
-    honda.replaySubscribe(speed -> System.out.printf("S2: Speed is now %d%n", speed),
-                    error -> System.out.printf("S2: Something went wrong%n"),
-                    () -> System.out.println("S2: Finished."));
+    honda.replaySubscribe(speed -> System.out.printf("2. Speed is now %d%n", speed),
+                    error -> System.out.printf("2. Something went wrong%n"),
+                    () -> System.out.println("2. Finished."));
     honda.accelerate(20);
     honda.brake(60);
   }
@@ -56,15 +56,15 @@ public class WatchingChanges {
     System.out.println("======================================================");
 
     Car honda = new Car("Honda", "Civic");
-    honda.beSubscribe(speed -> System.out.printf("S1: Speed is now %d%n", speed),
-                          error -> System.out.printf("S1: Something went wrong%n"),
-                          () -> System.out.println("S1: Finished."));
+    honda.beSubscribe(speed -> System.out.printf("1. Speed is now %d%n", speed),
+                          error -> System.out.printf("1. Something went wrong%n"),
+                          () -> System.out.println("1. Finished."));
     honda.accelerate(55);
     honda.brake(10);
 
-    honda.beSubscribe(speed -> System.out.printf("S2: Speed is now %d%n", speed),
-                          error -> System.out.printf("S2: Something went wrong%n"),
-                          () -> System.out.println("S2: Finished."));
+    honda.beSubscribe(speed -> System.out.printf("2. Speed is now %d%n", speed),
+                          error -> System.out.printf("2. Something went wrong%n"),
+                          () -> System.out.println("2. Finished."));
     honda.accelerate(20);
     honda.brake(60);
   }
@@ -76,18 +76,19 @@ public class WatchingChanges {
     System.out.println("======================================================");
 
     Car honda = new Car("Honda", "Civic");
-    honda.asyncSubscribe(speed -> System.out.printf("S1: Speed is now %d%n", speed),
-                      error -> System.out.printf("S1: Something went wrong%n"),
-                      () -> System.out.println("S1: Finished."));
+    honda.asyncSubscribe(speed -> System.out.printf("1. Speed is now %d%n", speed),
+                      error -> System.out.printf("1. Something went wrong%n"),
+                      () -> System.out.println("1. Finished."));
     honda.accelerate(55);
     honda.brake(10);
 
-    honda.asyncSubscribe(speed -> System.out.printf("S2: Speed is now %d%n", speed),
-                      error -> System.out.printf("S2: Something went wrong%n"),
-                      () -> System.out.println("S2: Finished."));
+    honda.asyncSubscribe(speed -> System.out.printf("2. Speed is now %d%n", speed),
+                      error -> System.out.printf("2. Something went wrong%n"),
+                      () -> System.out.println("2. Finished."));
     honda.accelerate(20);
     honda.brake(60);
 
+    System.out.println("Before calling honda.finish()");
     honda.finish();
     System.out.println("Done");
   }
@@ -97,14 +98,14 @@ public class WatchingChanges {
     private String model;
     private int speed = 0;
 
-    // Emits as you go along, no past, no most recent
-    private PublishSubject<Integer> pubTracker;
-
     // Emits all events from the start, regardless of when we subscribe
     private ReplaySubject<Integer> replayTracker;
 
     // Emits most recent, continues
     private BehaviorSubject<Integer> beTracker;
+
+    // Emits as you go along, no past, no most recent
+    private PublishSubject<Integer> pubTracker;
 
     // Emits last value after completion
     private AsyncSubject<Integer> asyncTracker;

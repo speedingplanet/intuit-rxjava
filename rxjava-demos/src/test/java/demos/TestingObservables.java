@@ -44,7 +44,6 @@ public class TestingObservables {
     testObserver.assertValue(result -> result > 5);
     testObserver.assertValue(result -> result == value);
 
-
     // What state is the Observable in?
     testObserver.assertComplete();
     testObserver.assertNoErrors();
@@ -78,6 +77,9 @@ public class TestingObservables {
     System.out.println("======================================================");
     Integer first = oList.blockingFirst(); // also blockingLast()
     assertEquals(first, n[0]);
+
+    // Failing version
+    // assertEquals(Integer.valueOf(20), n[0]);
   }
 
 }

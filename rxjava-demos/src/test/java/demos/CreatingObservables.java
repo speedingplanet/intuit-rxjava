@@ -109,8 +109,8 @@ public class CreatingObservables {
     // Plain subscribe() will exit because it runs on a daemon thread
     // infinite.subscribe(value -> System.out.printf("Current value: %d%n", value),
     infinite.blockingSubscribe(value -> System.out.printf("Current value: %d%n", value),
-                       error -> System.err.println("Something went wrong! "),
-                       () -> System.out.printf("onComplete will never run%n"));
+                               error -> System.err.println("Something went wrong! "),
+                               () -> System.out.printf("onComplete will never run%n"));
   }
 
   @Ignore
@@ -121,11 +121,15 @@ public class CreatingObservables {
     System.out.println("==============================================================");
 
     Observable<Long> slowTen = Observable.intervalRange(1, 10, 100, 250, TimeUnit.MILLISECONDS);
+    System.out.println("Before first sleep");
     Thread.sleep(4000); // No effect because the observable is cold
+    System.out.println("After first sleep");
     slowTen.subscribe(value -> System.out.printf("Current value: %d%n", value),
-                               error -> System.err.println("Something went wrong! "),
-                               () -> System.out.printf("Finished with all ten values"));
+                      error -> System.err.println("Something went wrong! "),
+                      () -> System.out.printf("Finished with all ten values"));
+    System.out.println("Before last sleep");
     Thread.sleep(4000); // Gives subscribe() time to run
+    System.out.println("After last sleep");
 
   }
 
@@ -139,7 +143,9 @@ public class CreatingObservables {
 
     Observable<Integer> oList = Observable.fromIterable(nList);
     Single<Integer> first = oList.first(0); // requires a default item
-    System.out.printf("Value as a one-liner: %d%n", oList.first(0).blockingGet());
+    System.out.printf("Value as a one-liner: %d%n",
+                      oList.first(0)
+                           .blockingGet());
     assertEquals(first.blockingGet(), n[0]);
 
     // Literally does not take a third argument
