@@ -1,5 +1,6 @@
 package rxjava.lab01;
 
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -60,7 +61,8 @@ public class ManagerTest {
     );
     List<Employee> employeesAdded = new ArrayList<>();
 
-    mgr1.getTeamAdditionsObservable().subscribe(evt -> employeesAdded.add(evt.getEmployee()));
+    // mgr1.getTeamAdditionsObservable().subscribe(evt -> employeesAdded.add(evt.getEmployee()));
+    mgr1.getEventsOfType(EmployeeAddition.class).subscribe(evt -> employeesAdded.add(evt.getEmployee()));
     for (Employee employee : employeesToAdd) {
       mgr1.addTeamMember(employee);
     }
@@ -77,7 +79,8 @@ public class ManagerTest {
             emp3
     );
     List<Employee> expectedEmployeesRemoved = Arrays.asList(emp1, emp3);
-    mgr1.getTeamRemovalsObservable().subscribe(evt -> employeesRemoved.add(evt.getEmployee()));
+    // mgr1.getTeamRemovalsObservable().subscribe(evt -> employeesRemoved.add(evt.getEmployee()));
+    mgr1.getEventsOfType(EmployeeRemoval.class).subscribe(evt -> employeesRemoved.add(evt.getEmployee()));
 
     for (Employee employee : employeesToRemove) {
       mgr1.removeTeamMember(employee);
@@ -96,7 +99,9 @@ public class ManagerTest {
             new Employee("jake", "wasicek", 20)
     );
     List<Employee> employeesAdded = new ArrayList<>();
-    mgr1.getTeamChangesObservable().subscribe(evt -> {
+    // Observable<EmployeeEvent> teamChangesObservable = mgr1.getTeamChangesObservable();
+    Observable<EmployeeEvent> teamChangesObservable = mgr1.getEventsOfType(EmployeeEvent.class);
+    teamChangesObservable.subscribe(evt -> {
       if (evt instanceof EmployeeAddition) {
         System.out.println("++++Employee added: " + evt.getEmployee());
         employeesAdded.add(evt.getEmployee());
@@ -121,7 +126,8 @@ public class ManagerTest {
 
   @Test
   public void monitorTeamRemovals_afterTeamFinalized() {
-    mgr1.getTeamRemovalsObservable().subscribe(System.out::println, err -> {}, () -> {});
+    // mgr1.getTeamRemovalsObservable().subscribe(System.out::println, err -> {}, () -> {});
+    mgr1.getEventsOfType(EmployeeRemoval.class).subscribe(System.out::println, err -> {}, () -> {});
 
     mgr1.finalizeTeam();
 

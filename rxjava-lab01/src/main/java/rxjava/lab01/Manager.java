@@ -74,6 +74,10 @@ public class Manager extends Employee {
     return teamTracker.ofType(EmployeeRemoval.class);
   }
 
+  public <T extends EmployeeEvent> Observable<T> getEventsOfType(Class<T> eventType) {
+    return teamTracker.ofType(eventType);
+  }
+
   public Observable<EmployeeEvent> getTeamChangesObservable() {
     return teamTracker;
   }
