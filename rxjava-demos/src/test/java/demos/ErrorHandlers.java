@@ -57,25 +57,20 @@ public class ErrorHandlers {
 
   @Test
   public void onErrorResumeNextTest() {
-    // On error, resume with the value proved by the Function provided
-    // Use onErrorResumeWith(Observable o) to provide an Observable directly
     System.out.println("======================================================");
     System.out.println("= onErrorResumeNext operator");
     System.out.println("======================================================");
-    AtomicInteger index = new AtomicInteger(0);
     numbers
-      .doOnNext((i) -> index.getAndIncrement() )
-      .map(i -> {
-             if (i % 5 != 0) {
-               return i;
-             } else {
-               throw new Exception("Divisible by  five!");
-             }
-           })
-           .onErrorResumeNext((e) -> numbers.skip(index.get()))
-           .subscribe(System.out::println,
-                      e -> System.err.println("Should never reach here"),
-                      () -> System.out.println("We're done here."));
+        .map(i -> {
+          if (i % 5 == 0) {
+            throw new Exception("Divisible by five!");
+          }
+          return i;
+        })
+        .onErrorResumeNext((e) -> Observable.empty())
+        .subscribe(System.out::println,
+                   e -> System.err.println("Should never reach here"),
+                   () -> System.out.println("We're done here."));
 
   }
 
@@ -112,6 +107,49 @@ public class ErrorHandlers {
            .onErrorReturnItem(-1)
            .subscribe(System.out::println,
                       e -> System.err.println("Should never " + "reach here"),
+                      () -> System.out.println("We're done here."));
+
+  }
+
+  @Test
+  public void onErrorResumeNextAtomic() {
+    System.out.println("======================================================");
+    System.out.println("= onErrorResumeNext operator");
+    System.out.println("======================================================");
+    AtomicInteger index = new AtomicInteger(0);
+    numbers
+        .doOnNext((i) -> index.getAndIncrement())
+        .map(i -> {
+          if (i % 5 == 0) {
+            throw new Exception("Divisible by five!");
+          }
+          return i;
+        })
+        .onErrorResumeNext((e) -> numbers.skip(index.get()))
+        .subscribe(System.out::println,
+                   e -> System.err.println("Should never reach here"),
+                   () -> System.out.println("We're done here."));
+
+  }
+
+  @Test
+  public void onErrorResumeNextActuallyResumes() {
+    numbers.map(i -> {
+             if (i % 5 == 0) {
+               return Observable.error(new RuntimeException("Divisible by five!"));
+             }
+             return Observable.just(i);
+           })
+           .flatMap(o -> {
+             return o.onErrorResumeNext(e -> Observable.empty());
+           })
+           .onErrorResumeNext(e -> {
+             System.err.println("Error detected");
+             return Observable.empty();
+           })
+           // .flatMap(i -> i)
+           .subscribe(System.out::println,
+                      e -> System.err.println("Should never reach here"),
                       () -> System.out.println("We're done here."));
 
   }
