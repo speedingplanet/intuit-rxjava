@@ -1,5 +1,7 @@
 package rxjava.lab01;
 
+import io.reactivex.rxjava3.core.Observable;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -15,6 +17,10 @@ public class Manager extends Employee {
 
   public List<Employee> getTeam() {
     return team;
+  }
+
+  public Observable<Employee> getTeamAsObservable() {
+    return Observable.fromIterable(getTeam());
   }
 
   @Override

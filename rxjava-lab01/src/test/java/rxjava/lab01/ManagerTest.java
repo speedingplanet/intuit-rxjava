@@ -1,9 +1,16 @@
 package rxjava.lab01;
 
+import static org.assertj.core.api.Assertions.assertThat;
+// import org.junit.Assert;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ManagerTest {
   Employee emp1, emp2, emp3, emp4, emp5, emp6, emp7;
@@ -26,4 +33,64 @@ public class ManagerTest {
     mgr1 = new Manager("Steve", "Topdog", 100000, mgr1Team);
     mgr2 = new Manager("Jenny", "Bigcheese", 100000, mgr2Team);
   }
+
+  @Ignore
+  @Test
+  public void testResults() {
+    mgr1.getTeamAsObservable()
+        .subscribe(v -> {
+          System.out.println("Employee: " + emp1);
+        }, e -> {
+          System.err.println("Error: " + e);
+        }, () -> {
+          System.out.println("Finished");
+        });
+  }
+
+  @Ignore
+  @Test
+  public void testKapilsError() {
+    mgr1.getTeamAsObservable()
+        .collect(Collectors.toList())
+        .subscribe(empList -> {
+          assertThat(empList).contains(emp4);
+        }, err -> {
+          System.err.println("*** Custom error:" + err.getLocalizedMessage());
+        });
+  }
+
+  @Ignore
+  @Test
+  public void testStandardError() {
+    Iterable<Employee> empList = mgr1.getTeamAsObservable()
+                                     .blockingIterable();
+    assertThat(empList).contains(emp1);
+  }
+
+  @Ignore
+  @Test
+  public void testObservableFirst() {
+    mgr1.getTeamAsObservable()
+        .firstElement()
+        .subscribe(emp -> {
+          // This raises an AssertionError if it fails
+          Assert.assertSame(emp, emp1);
+        }, err -> {
+          System.err.println("*** Custom error:" + err.getLocalizedMessage());
+        });
+  }
+
+  @Ignore
+  @Test
+  public void testObservableError() {
+    mgr1.getTeamAsObservable()
+        .toList()
+        .subscribe(empList -> {
+          // This raises an AssertionError if it fails
+          Assert.assertTrue(empList.contains(emp1));
+        }, err -> {
+          System.err.println("*** Custom error:" + err.getLocalizedMessage());
+        });
+  }
+
 }
