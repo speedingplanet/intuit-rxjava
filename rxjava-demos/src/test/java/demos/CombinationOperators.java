@@ -35,6 +35,19 @@ public class CombinationOperators {
     numbers.subscribe(System.out::println);
   }
 
+  @Test
+  public void timedConcatTest() {
+    System.out.println("======================================================");
+    System.out.println("= concat operator with timing");
+    System.out.println("======================================================");
+    Observable<Integer>  i =
+        Observable.intervalRange(1, 3, 0, 1000, TimeUnit.MILLISECONDS).map(Long::intValue);
+    Observable<Integer>  j = Observable.just(4, 5, 6);
+    Observable<Integer>  numbers = Observable.concat(i, j);
+
+    numbers.blockingSubscribe(System.out::println);
+  }
+
   @Ignore
   @Test
   public void mergeTest() {
