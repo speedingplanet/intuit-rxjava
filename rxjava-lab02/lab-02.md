@@ -2,7 +2,8 @@
 
 ## Part 1
 
-All of the below in `Manager.java`.
+All of the below in `ManagerTest.java`. Each item should be a test. Or you could
+combine them into one test....
 
 1. Create an observable that prints only the first two employees under each of the managers. 
 2. Concatenate all the employees together into one observable by getting them from their respective managers.
