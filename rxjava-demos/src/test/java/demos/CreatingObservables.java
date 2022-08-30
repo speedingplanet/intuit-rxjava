@@ -40,6 +40,23 @@ public class CreatingObservables {
     o.subscribe(v -> System.out.printf("Value: %s%n", v),               // onNext
                 e -> System.out.printf("Something went wrong!%n"),      // onError
                 () -> System.out.printf("testFromJust() finished%n"));  // onComplete
+
+    o.subscribe(v -> System.out.printf("Second subscription: %s%n", v),
+                e -> System.out.printf("Something went wrong!%n"),
+                () -> System.out.printf("Second subscription: testFromJust() finished%n"));
+
+  }
+
+  @Ignore
+  @Test
+  public void testGetOneValue() {
+    System.out.println("======================================================");
+    System.out.println("= Get just one value from an observable");
+    System.out.println("======================================================");
+    String name = "John";
+    Observable<String> o = Observable.just(name, "Dan", "Tim", "Andreina", "Hector", "Andres");
+    String firstName = o.blockingFirst();
+    System.out.printf("First value: %s%n", firstName);
   }
 
   @Ignore
@@ -49,7 +66,6 @@ public class CreatingObservables {
     System.out.println("= Demonstrating Observable.range(int start, int count)");
     System.out.println("======================================================");
 
-    // Ending values are non-inclusive
     Observable<Integer> oRange = Observable.range(10, 35);
     oRange.subscribe(value -> System.out.printf("Value: %d%n", value),
                      error -> System.err.println("Something went wrong"),
@@ -99,7 +115,7 @@ public class CreatingObservables {
 
   @Ignore
   @Test
-  public void testFromInterval() {
+  public void testFromInterval() throws InterruptedException {
     System.out.println("======================================================");
     System.out.println("= An Observable that emits at intervals");
     System.out.println("======================================================");
@@ -108,9 +124,17 @@ public class CreatingObservables {
 
     // Plain subscribe() will exit because it runs on a daemon thread
     // infinite.subscribe(value -> System.out.printf("Current value: %d%n", value),
-    infinite.blockingSubscribe(value -> System.out.printf("Current value: %d%n", value),
+    infinite.subscribe(value -> System.out.printf("First sub, non-blocking: %d%n", value),
                                error -> System.err.println("Something went wrong! "),
                                () -> System.out.printf("onComplete will never run%n"));
+
+    // Never gets here because a) previous code is blocking and b) never completes
+    infinite.subscribe(value -> System.out.printf("Second sub, blocking: %d%n", value),
+                               error -> System.err.println("Something went wrong! "),
+                               () -> System.out.printf("onComplete will never run%n"));
+
+    Thread.sleep(1500);
+    System.out.println("About to exit, probably havent' seen any numbers at this point.");
   }
 
   @Ignore
