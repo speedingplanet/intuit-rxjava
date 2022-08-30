@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 
@@ -115,6 +116,41 @@ public class CreatingObservables {
 
   @Ignore
   @Test
+  public void testToIterableNonBlockingLoop() {
+    System.out.println("======================================================");
+    System.out.println("= Get all the items in an observable as an iterable");
+    System.out.println("======================================================");
+
+    AtomicBoolean isFinished = new AtomicBoolean(false);
+    Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
+    List<Integer> values = new ArrayList<>();
+
+    // The List values isn't "finished" until onComplete
+    oList.subscribe(values::add,
+                    System.err::println,
+                    () -> isFinished.set(true));
+  }
+
+  @Ignore
+  @Test
+  public void testToIterableNonBlockingToList() {
+    System.out.println("======================================================");
+    System.out.println("= Get all the items in an observable as an iterable");
+    System.out.println("======================================================");
+
+    Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
+    Single<List<Integer>> values = oList.toList();
+
+    // oList is cold (not running) until this subscription!
+    values.subscribe(listOfValues -> {
+      for (Integer i : listOfValues) {
+        System.out.printf("Integer value: %d%n", i);
+      }
+    });
+  }
+
+  @Ignore
+  @Test
   public void testFromInterval() throws InterruptedException {
     System.out.println("======================================================");
     System.out.println("= An Observable that emits at intervals");
@@ -125,13 +161,13 @@ public class CreatingObservables {
     // Plain subscribe() will exit because it runs on a daemon thread
     // infinite.subscribe(value -> System.out.printf("Current value: %d%n", value),
     infinite.subscribe(value -> System.out.printf("First sub, non-blocking: %d%n", value),
-                               error -> System.err.println("Something went wrong! "),
-                               () -> System.out.printf("onComplete will never run%n"));
+                       error -> System.err.println("Something went wrong! "),
+                       () -> System.out.printf("onComplete will never run%n"));
 
     // Never gets here because a) previous code is blocking and b) never completes
     infinite.subscribe(value -> System.out.printf("Second sub, blocking: %d%n", value),
-                               error -> System.err.println("Something went wrong! "),
-                               () -> System.out.printf("onComplete will never run%n"));
+                       error -> System.err.println("Something went wrong! "),
+                       () -> System.out.printf("onComplete will never run%n"));
 
     Thread.sleep(1500);
     System.out.println("About to exit, probably havent' seen any numbers at this point.");
