@@ -2,6 +2,7 @@ package demos;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableTransformer;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,6 +43,18 @@ public class RxOperators {
     System.out.print("Taking items while their value is less than three: ");
     o1.takeWhile(v -> v < 3)
       .forEach(v -> System.out.printf("%d ", v));
+  }
+
+  @Test
+  public void takeLastTiming() {
+    Observable<Long> o1 = Observable.intervalRange(1, 16, 0, 250, TimeUnit.MILLISECONDS);
+    Observable<Long> o2 = o1.doOnNext(v -> System.out.printf("At value %d%n", v))
+                            .doOnComplete(() -> System.out.println("Finished counting, can now " +
+                                                                       "run takeLast."))
+                            .takeLast(4);
+    o2.blockingSubscribe(v -> System.out.printf("One of the last four values: %d%n", v),
+                         err -> System.err.println("Something went wrong, though that's unlikely."),
+                         () -> System.out.println("Finished with o2"));
   }
 
   @Test
@@ -89,6 +102,15 @@ public class RxOperators {
     Observable<Integer> numbers = Observable.range(2, 10);
     numbers.map(x -> x * 2)
            .subscribe(System.out::println);
+
+    // RxJava does not "cut to the chase" with a terminal operator
+    Single<Long> count = numbers.map(x -> {
+                                  System.out.println("Mapped");
+                                  return x * 3;
+                                })
+                                .count();
+
+    System.out.printf("Count of values: %d%n", count.blockingGet());
   }
 
   @Ignore
@@ -122,19 +144,10 @@ public class RxOperators {
     System.out.println("======================================================");
     AtomicInteger executionCount = new AtomicInteger();
     Observable<Integer> numbers = Observable.range(2, 10);
-    numbers.doOnNext((v) -> {
-             executionCount.getAndIncrement();
-           })
-           .filter(x -> {
-
-             return x % 2 == 0;
-           })
-           .doOnNext((v) -> {
-             executionCount.getAndIncrement();
-           })
-           .map(x -> {
-             return x / 2;
-           })
+    numbers.doOnNext((v) -> executionCount.getAndIncrement())
+           .filter(x -> x % 2 == 0)
+           .doOnNext((v) -> executionCount.getAndIncrement())
+           .map(x -> x / 2)
            .subscribe(System.out::println);
     System.out.printf("filter, then map execution count: %d%n", executionCount.get());
   }
@@ -175,10 +188,10 @@ public class RxOperators {
     System.out.println("= flatMap(Function f (and others)) operator");
     System.out.println("======================================================");
     Observable<String> a =
-      Observable.just("aardvark", "abscond", "alpha", "apples");
+        Observable.just("aardvark", "abscond", "alpha", "apples");
     Observable<String> b = Observable.just("banana", "bat", "beta", "bottle");
     Observable<String> c =
-      Observable.just("car", "catamaran", "center", "cozy");
+        Observable.just("car", "catamaran", "center", "cozy");
     Map<String, Observable<String>> wordList = new HashMap<>();
 
     // wordList['A'] ---> Observable<String> ["aardvark", "abscond", "alpha", "apples"]
@@ -192,12 +205,10 @@ public class RxOperators {
     // Observable<Observable<String>> results = keys.map(wordList::get);
 
     // Might interleave, where concatMap will guarantee ordering
-    keys.flatMap(key -> {
-          System.out.printf("*** %s ***%n", key);
-          return wordList.get(key); // without flatMap, this would be an Observable of words
-        }) //  ["aardvark", "abscond", "alpha", "apples"], and following
+    // System.out.printf("*** %s ***%n", key);
+    // without flatMap, this would be an Observable of words
+    keys.flatMap(wordList::get) //  ["aardvark", "abscond", "alpha", "apples"], and following
         .subscribe(System.out::println);
-
   }
 
   @Test
@@ -254,8 +265,8 @@ public class RxOperators {
   public void composeExample() {
     String[] a = { "aardvark", "abscond", "alpha", "apples" };
     ObservableTransformer<String, StringBuilder> reverser =
-      strOuter -> strOuter.map(s -> new StringBuilder().append(s)
-                                                       .reverse());
+        strOuter -> strOuter.map(s -> new StringBuilder().append(s)
+                                                         .reverse());
 
     Observable<String> words = Observable.fromArray(a);
     words.map(String::toUpperCase)
@@ -271,7 +282,7 @@ public class RxOperators {
     System.out.println("= compose(ObservableTransformer) operator");
     System.out.println("======================================================");
     ObservableTransformer<String, Integer> convertToInteger =
-      i -> i.map(Integer::parseInt);
+        i -> i.map(Integer::parseInt);
     Observable.just("1", "2", "3")
               // .map(Integer::parseInt)
               .compose(convertToInteger)
@@ -290,11 +301,11 @@ public class RxOperators {
 
     // antenna doesn't map to anything in 'b'.
     Observable<String> a =
-      Observable.just("aardvark", "abscond", "alpha", "apples", "antenna");
+        Observable.just("aardvark", "abscond", "alpha", "apples", "antenna");
     Observable<String> b = Observable.just("banana", "bat", "beta", "bottle");
 
     Observable<String> zipped =
-      Observable.zip(a, b, (a1, b1) -> String.format("%s / %s%n", a1, b1));
+        Observable.zip(a, b, (a1, b1) -> String.format("%s / %s%n", a1, b1));
 
     zipped.subscribe(System.out::print, System.err::println);
   }
