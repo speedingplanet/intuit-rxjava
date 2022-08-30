@@ -38,7 +38,7 @@ public class ObserveOnSubscribeOn {
                                   i);
                 return i;
               })
-              .subscribeOn(Schedulers.single()) // Otherwise [main]
+              // .subscribeOn(Schedulers.single()) // Otherwise [main]
               .subscribe(v -> System.out.printf("Subscription: [%s] %s%n",
                                                 Thread.currentThread()
                                                       .getName(),
@@ -58,14 +58,14 @@ public class ObserveOnSubscribeOn {
                                   Thread.currentThread()
                                         .getName(),
                                   i);
-                return i + "{main}";
+                return i + " {firstMap}";
               })
               .map(i -> {
                 System.out.printf("\t[%s] %s %n",
                                   Thread.currentThread()
                                         .getName(),
                                   i);
-                return i + "{second map}";
+                return i + " {second map}";
               })
               .map(i -> {
                 System.out.printf("\t[%s] (still) %s %n",
@@ -108,7 +108,7 @@ public class ObserveOnSubscribeOn {
                                                           i);
                                         return i;
                                       });
-    ReplaySubject<String> subject = ReplaySubject.<String>create();
+    ReplaySubject<String> subject = ReplaySubject.create();
     o1.subscribe(subject);
     subject.subscribeOn(Schedulers.io())
            .subscribe(v -> System.out.printf("OUTPUT: [%s] %s%n",
