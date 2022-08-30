@@ -44,10 +44,10 @@ public class ErrorHandlers {
              if (i % 5 != 0) {
                return i;
              } else {
-               throw new Exception("Divisible by " + "five!");
+               throw new Exception("Divisible by five!");
              }
            })
-           .doOnError(e -> System.out.println("*** secret error message ***"))
+           .doOnError(e -> System.err.println("*** secret error message ***"))
            .onErrorComplete()
            .subscribe(System.out::println,
                       e -> System.err.println("Should never reach here"),
@@ -67,7 +67,10 @@ public class ErrorHandlers {
           }
           return i;
         })
-        .onErrorResumeNext((e) -> Observable.empty())
+        // If there's an error, return an empty observable (but don't break)
+        // .onErrorResumeNext((e) -> Observable.empty())
+        // If there's an error, return a replacement observable
+        .onErrorResumeNext((e) -> Observable.just(10, 11, 12, 13, 14))
         .subscribe(System.out::println,
                    e -> System.err.println("Should never reach here"),
                    () -> System.out.println("We're done here."));
@@ -88,7 +91,7 @@ public class ErrorHandlers {
            })
            .onErrorReturn((e) -> -1)
            .subscribe(System.out::println,
-                      e -> System.err.println("Should never " + "reach here"),
+                      e -> System.err.println("Should never reach here"),
                       () -> System.out.println("We're done here."));
 
   }
@@ -106,7 +109,7 @@ public class ErrorHandlers {
            })
            .onErrorReturnItem(-1)
            .subscribe(System.out::println,
-                      e -> System.err.println("Should never " + "reach here"),
+                      e -> System.err.println("Should never reach here"),
                       () -> System.out.println("We're done here."));
 
   }
@@ -143,11 +146,6 @@ public class ErrorHandlers {
            .flatMap(o -> {
              return o.onErrorResumeNext(e -> Observable.empty());
            })
-           .onErrorResumeNext(e -> {
-             System.err.println("Error detected");
-             return Observable.empty();
-           })
-           // .flatMap(i -> i)
            .subscribe(System.out::println,
                       e -> System.err.println("Should never reach here"),
                       () -> System.out.println("We're done here."));
