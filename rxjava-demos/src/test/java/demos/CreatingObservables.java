@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,14 +37,17 @@ public class CreatingObservables {
     String name = "John";
     Observable<String> o = Observable.just(name, "Dan", "Tim", "Andreina", "Hector", "Andres");
 
-    o.subscribe(v -> System.out.printf("Value: %s%n", v),               // onNext
-                e -> System.out.printf("Something went wrong!%n"),      // onError
-                () -> System.out.printf("testFromJust() finished%n"));  // onComplete
+    o.subscribe(
+      v -> System.out.printf("Value: %s%n", v),               // onNext
+      e -> System.out.printf("Something went wrong!%n"),      // onError
+      () -> System.out.printf("testFromJust() finished%n")
+    );  // onComplete
 
-    o.subscribe(v -> System.out.printf("Second subscription: %s%n", v),
-                e -> System.out.printf("Something went wrong!%n"),
-                () -> System.out.printf("Second subscription: testFromJust() finished%n"));
-
+    o.subscribe(
+      v -> System.out.printf("Second subscription: %s%n", v),
+      e -> System.out.printf("Something went wrong!%n"),
+      () -> System.out.printf("Second subscription: testFromJust() finished%n")
+    );
   }
 
   @Ignore
@@ -68,9 +70,11 @@ public class CreatingObservables {
     System.out.println("======================================================");
 
     Observable<Integer> oRange = Observable.range(10, 35);
-    oRange.subscribe(value -> System.out.printf("Value: %d%n", value),
-                     error -> System.err.println("Something went wrong"),
-                     () -> System.out.printf("Range completed"));
+    oRange.subscribe(
+      value -> System.out.printf("Value: %d%n", value),
+      error -> System.err.println("Something went wrong"),
+      () -> System.out.print("Range completed")
+    );
   }
 
   @Ignore
@@ -81,9 +85,11 @@ public class CreatingObservables {
     System.out.println("======================================================");
     Observable<Integer> numbers = Observable.fromArray(n);
 
-    numbers.subscribe(value -> System.out.printf("value is %d%n", value),
-                      error -> System.out.printf("Something went wrong!%n"),
-                      () -> System.out.printf("testFromArray() finished%n"));
+    numbers.subscribe(
+      value -> System.out.printf("value is %d%n", value),
+      error -> System.out.printf("Something went wrong!%n"),
+      () -> System.out.printf("testFromArray() finished%n")
+    );
   }
 
   @Ignore
@@ -94,9 +100,11 @@ public class CreatingObservables {
     System.out.println("======================================================");
 
     Observable<Integer> oList = Observable.fromIterable(nList);
-    oList.subscribe(value -> System.out.printf("value is %d%n", value),
-                    error -> System.out.printf("Something went wrong!%n"),
-                    () -> System.out.printf("testFromIterable() finished%n"));
+    oList.subscribe(
+      value -> System.out.printf("value is %d%n", value),
+      error -> System.out.printf("Something went wrong!%n"),
+      () -> System.out.printf("testFromIterable() finished%n")
+    );
   }
 
   @Ignore
@@ -116,37 +124,43 @@ public class CreatingObservables {
 
   @Ignore
   @Test
-  public void testToIterableNonBlockingLoop() {
-    System.out.println("======================================================");
-    System.out.println("= Get all the items in an observable as an iterable");
-    System.out.println("======================================================");
-
-    AtomicBoolean isFinished = new AtomicBoolean(false);
-    Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
-    List<Integer> values = new ArrayList<>();
-
-    // The List values isn't "finished" until onComplete
-    oList.subscribe(values::add,
-                    System.err::println,
-                    () -> isFinished.set(true));
-  }
-
-  @Ignore
-  @Test
   public void testToIterableNonBlockingToList() {
     System.out.println("======================================================");
     System.out.println("= Get all the items in an observable as an iterable");
     System.out.println("======================================================");
 
-    Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
+    Callable<Integer> counter = () -> {
+      System.out.println("0: Called counter()");
+      return 10;
+    };
+
+    // Observable<Integer> oList = Observable.just(1, 2, 3, 4, 5, 6, 7, 8);
+    System.out.println("1: About to create Observable");
+    Observable<Integer> oList = Observable.fromCallable(counter);
+    System.out.println("2: Created Observable");
+
+    // Uncached version
     Single<List<Integer>> values = oList.toList();
 
-    // oList is cold (not running) until this subscription!
+    // Cached version
+    /*
+    Observable<Integer> cached = oList.cache();
+    System.out.println("2.1 about to subscribe to cached version");
+    cached.subscribe(); // cached should be populated by here
+    System.out.println("2.2 subscribed to cached version");
+    Single<List<Integer>> values = cached.toList();
+     */
+
+    System.out.println("3: Converted Observable to Single<List<Integer>>");
+
+    System.out.println("4: Subscribing to Single");
     values.subscribe(listOfValues -> {
+      System.out.println("5: Subscription.onNext handler");
       for (Integer i : listOfValues) {
         System.out.printf("Integer value: %d%n", i);
       }
     });
+    System.out.println("6: After subscription");
   }
 
   @Ignore
@@ -160,14 +174,18 @@ public class CreatingObservables {
 
     // Plain subscribe() will exit because it runs on a daemon thread
     // infinite.subscribe(value -> System.out.printf("Current value: %d%n", value),
-    infinite.subscribe(value -> System.out.printf("First sub, non-blocking: %d%n", value),
-                       error -> System.err.println("Something went wrong! "),
-                       () -> System.out.printf("onComplete will never run%n"));
+    infinite.subscribe(
+      value -> System.out.printf("First sub, non-blocking: %d%n", value),
+      error -> System.err.println("Something went wrong! "),
+      () -> System.out.printf("onComplete will never run%n")
+    );
 
     // Never gets here because a) previous code is blocking and b) never completes
-    infinite.subscribe(value -> System.out.printf("Second sub, blocking: %d%n", value),
-                       error -> System.err.println("Something went wrong! "),
-                       () -> System.out.printf("onComplete will never run%n"));
+    infinite.subscribe(
+      value -> System.out.printf("Second sub, blocking: %d%n", value),
+      error -> System.err.println("Something went wrong! "),
+      () -> System.out.printf("onComplete will never run%n")
+    );
 
     Thread.sleep(1500);
     System.out.println("About to exit, probably havent' seen any numbers at this point.");
@@ -184,13 +202,14 @@ public class CreatingObservables {
     System.out.println("Before first sleep");
     Thread.sleep(4000); // No effect because the observable is cold
     System.out.println("After first sleep");
-    slowTen.subscribe(value -> System.out.printf("Current value: %d%n", value),
-                      error -> System.err.println("Something went wrong! "),
-                      () -> System.out.printf("Finished with all ten values"));
+    slowTen.subscribe(
+      value -> System.out.printf("Current value: %d%n", value),
+      error -> System.err.println("Something went wrong! "),
+      () -> System.out.print("Finished with all ten values")
+    );
     System.out.println("Before last sleep");
     Thread.sleep(4000); // Gives subscribe() time to run
     System.out.println("After last sleep");
-
   }
 
   @Ignore
@@ -203,15 +222,18 @@ public class CreatingObservables {
 
     Observable<Integer> oList = Observable.fromIterable(nList);
     Single<Integer> first = oList.first(0); // requires a default item
-    System.out.printf("Value as a one-liner: %d%n",
-                      oList.first(0)
-                           .blockingGet());
+    System.out.printf(
+      "Value as a one-liner: %d%n",
+      oList.first(0)
+           .blockingGet()
+    );
     assertEquals(first.blockingGet(), n[0]);
 
     // Literally does not take a third argument
-    first.subscribe(value -> System.out.println("Value: " + value),
-                    error -> System.out.println("Problem: " + error)
-                   );
+    first.subscribe(
+      value -> System.out.println("Value: " + value),
+      error -> System.out.println("Problem: " + error)
+    );
   }
 
   @Ignore
@@ -225,18 +247,22 @@ public class CreatingObservables {
     Maybe<Integer> first = oList.firstElement();
 
     // isEmpty() returns a Single (not a boolean)
-    System.out.printf("Is the Maybe empty? %b%n",
-                      first.isEmpty()
-                           .blockingGet());
-    first.subscribe(v -> {
-                      System.out.println("Maybe should print this once: " + v);
-                    },
-                    error -> {
-                      System.err.println("Maybe could go here, if something goes wrong");
-                    },
-                    () -> {
-                      System.out.println("Maybe prints this if there is no value");
-                    });
+    System.out.printf(
+      "Is the Maybe empty? %b%n",
+      first.isEmpty()
+           .blockingGet()
+    );
+    first.subscribe(
+      v -> {
+        System.out.println("Maybe should print this once: " + v);
+      },
+      error -> {
+        System.err.println("Maybe could go here, if something goes wrong");
+      },
+      () -> {
+        System.out.println("Maybe prints this if there is no value");
+      }
+    );
   }
 
   @Ignore
@@ -250,18 +276,22 @@ public class CreatingObservables {
     Maybe<Integer> first = oEmpty.firstElement();
 
     // isEmpty() returns a Single (not a boolean)
-    System.out.printf("Is the Maybe empty? %b%n",
-                      first.isEmpty()
-                           .blockingGet());
-    first.subscribe(v -> {
-                      System.out.println("Maybe should not print this: " + v);
-                    },
-                    error -> {
-                      System.err.println("Maybe could go here, if something goes wrong");
-                    },
-                    () -> {
-                      System.out.println("Maybe should print this since it's empty");
-                    });
+    System.out.printf(
+      "Is the Maybe empty? %b%n",
+      first.isEmpty()
+           .blockingGet()
+    );
+    first.subscribe(
+      v -> {
+        System.out.println("Maybe should not print this: " + v);
+      },
+      error -> {
+        System.err.println("Maybe could go here, if something goes wrong");
+      },
+      () -> {
+        System.out.println("Maybe should print this since it's empty");
+      }
+    );
   }
 
   @Ignore
@@ -276,15 +306,16 @@ public class CreatingObservables {
     System.out.println("= Demonstrating Observable.fromSupplier()");
     System.out.println("======================================================");
     Observable<Long> o = Observable.fromSupplier(System::currentTimeMillis);
-    o.subscribe(value -> System.out.printf("Value: %d%n", value),
-                error -> System.out.printf("Something went wrong%n"),
-                () -> System.out.println("testSupplier() finished"));
+    o.subscribe(
+      value -> System.out.printf("Value: %d%n", value),
+      error -> System.out.printf("Something went wrong%n"),
+      () -> System.out.println("testSupplier() finished")
+    );
   }
 
   // RxJava Suppliers throw Throwables, more flexible than Exceptions, and are part of the
   // RxJava API. Do not confuse it with java.util.function.Supplier, which cannot
   // throw anything
-  @SuppressWarnings("rawtypes")
   @Ignore
   @Test
   public void supplierGoneWrong() {
@@ -292,23 +323,20 @@ public class CreatingObservables {
     System.out.println("= Demonstrating Observable.supplierGoneWrong(), with error");
     System.out.println("=============================================================");
     Observable<Long> o = Observable.fromSupplier(() -> {
-      if (4 % 2 == 1) {
-        return 1L;
-      } else {
-        throw new Error("Very bad at math");
-      }
+      throw new Error("Very bad at math");
     });
-    o.subscribe(value -> System.out.printf("Value: %d%n", value),
-                error -> System.out.printf("As expected: something went wrong: %s%n", error),
-                () -> System.out.println("testSupplier() finished"));
+    o.subscribe(
+      value -> System.out.printf("Value: %d%n", value),
+      error -> System.out.printf("As expected: something went wrong: %s%n", error),
+      () -> System.out.println("testSupplier() finished")
+    );
 
+    // Uncomment to see the weird typing issues between competing versions of Supplier
+    /*
     java.util.function.Supplier supplierThatThrows = () -> {
-      if (4 % 2 == 1) {
-        return 1L;
-      } else {
-        throw new Error("Very bad at math");
-      }
+      throw new Error("Very bad at math");
     };
+     */
 
     // This won't work, because supplierThatThrows is of the wrong type
     // Observable<Long> o2 = Observable.fromSupplier(supplierThatThrows);
@@ -325,9 +353,11 @@ public class CreatingObservables {
     System.out.println("======================================================");
     Callable<Integer> getNumber = () -> 10;
     Observable<Integer> o = Observable.fromCallable(getNumber);
-    o.subscribe(value -> System.out.printf("Value: %d%n", value),
-                error -> System.out.printf("Something went wrong: %s%n", error),
-                () -> System.out.println("testFromCallable() finished"));
+    o.subscribe(
+      value -> System.out.printf("Value: %d%n", value),
+      error -> System.out.printf("Something went wrong: %s%n", error),
+      () -> System.out.println("testFromCallable() finished")
+    );
   }
 
   // Callables throw Exceptions, and are part of java.util.concurrent, which implies
@@ -341,9 +371,11 @@ public class CreatingObservables {
     System.out.println("=============================================================");
     Observable<Integer> bad = Observable.fromCallable(() -> 10 / 0);
 
-    bad.subscribe(v -> System.out.printf("Never happens%n"),
-                  e -> System.out.printf("Exception, which should happen%n"),
-                  () -> System.out.printf("Complete, never happens.%n"));
+    bad.subscribe(
+      v -> System.out.printf("Never happens%n"),
+      e -> System.out.printf("Exception, which should happen%n"),
+      () -> System.out.printf("Complete, never happens.%n")
+    );
   }
 
   @Ignore
@@ -370,11 +402,11 @@ public class CreatingObservables {
     System.out.println("Observable created");
 
     System.out.println("Before subscribing");
-    cold.subscribe(value -> System.out.printf("Value: %s%n", value),
-                   error -> System.out.printf("Something went wrong: %s%n", error),
-                   () -> System.out.printf("testFromCallableAsDeferred() Finished%n"));
+    cold.subscribe(
+      value -> System.out.printf("Value: %s%n", value),
+      error -> System.out.printf("Something went wrong: %s%n", error),
+      () -> System.out.printf("testFromCallableAsDeferred() Finished%n")
+    );
     System.out.println("After subscribing");
-
   }
-
 }
