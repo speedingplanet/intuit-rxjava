@@ -20,7 +20,6 @@ Open `Manager`. Update the following:
 * Update `getTeam` so it returns an Observable of the individual team members (not a one-element
   Observable wrapped around the List). 
 * Open `ManagerTest`. Write a test for:
-  * `getTeam` returning an Observable
   * Retrieving at least one item out of the `getTeam` observable to verify it is correct.
 
 ### Something to think about
