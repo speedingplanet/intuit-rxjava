@@ -140,16 +140,15 @@ public class CreatingObservables {
     System.out.println("2: Created Observable");
 
     // Uncached version
-    Single<List<Integer>> values = oList.toList();
+    // oList.subscribe(); // This has no effect on the next line, because we are not caching results
+    // Single<List<Integer>> values = oList.toList();
 
     // Cached version
-    /*
     Observable<Integer> cached = oList.cache();
     System.out.println("2.1 about to subscribe to cached version");
     cached.subscribe(); // cached should be populated by here
     System.out.println("2.2 subscribed to cached version");
     Single<List<Integer>> values = cached.toList();
-     */
 
     System.out.println("3: Converted Observable to Single<List<Integer>>");
 
@@ -161,6 +160,13 @@ public class CreatingObservables {
       }
     });
     System.out.println("6: After subscription");
+
+    values.subscribe(listOfValues -> {
+      System.out.println("7: Second Subscription.onNext handler");
+      for (Integer i : listOfValues) {
+        System.out.printf("Integer value: %d%n", i);
+      }
+    });
   }
 
   @Ignore
