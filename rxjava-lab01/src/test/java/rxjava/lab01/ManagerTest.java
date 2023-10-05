@@ -2,6 +2,8 @@ package rxjava.lab01;
 
 import static org.assertj.core.api.Assertions.assertThat;
 // import org.junit.Assert;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -37,8 +39,8 @@ public class ManagerTest {
   @Test
   public void testResults() {
     mgr1.getTeamAsObservable()
-        .subscribe(v -> {
-          System.out.println("Employee: " + emp1);
+        .subscribe(emp -> {
+          System.out.println("Employee: " + emp);
         }, e -> {
           System.err.println("Error: " + e);
         }, () -> {
@@ -69,7 +71,6 @@ public class ManagerTest {
         .firstElement()
         .subscribe(emp -> {
           // This raises an AssertionError if it fails
-          // Details here: https://github.com/ReactiveX/RxJava/wiki/What's-different-in-2.0#error-handling
           Assert.assertSame(emp, emp1);
         }, err -> {
           System.err.println("*** Custom error:" + err.getLocalizedMessage());
@@ -83,9 +84,41 @@ public class ManagerTest {
         .firstElement()
         .subscribe(emp -> {
           // This raises an AssertionError if it fails
+          // Details here: https://github.com/ReactiveX/RxJava/wiki/What's-different-in-2.0#error-handling
           Assert.assertSame(emp, emp4);
         }, err -> {
           System.err.println("*** Custom error:" + err.getLocalizedMessage());
         });
+  }
+
+  @Ignore
+  @Test
+  public void testDidObservableComplete() {
+    Observable<Employee> emps = mgr1.getTeamAsObservable();
+    TestObserver<Employee> to = emps.test();
+
+    to.assertComplete();
+  }
+
+  @Ignore
+  @Test
+  public void testDidObservableHaveErrors() {
+    Observable<Employee> emps = mgr1.getTeamAsObservable();
+    TestObserver<Employee> to = emps.test();
+
+    to.assertNoErrors();
+  }
+
+  @Ignore
+  @Test
+  public void testObservableValues() {
+    Observable<Employee> emps = mgr1.getTeamAsObservable();
+    TestObserver<Employee> to = emps.test();
+
+    to.assertValueAt(0, mgr1.getTeam().get(0));
+    to.assertValueCount(mgr1.getTeam().size());
+
+    to.assertValueSequence(mgr1Team);
+    to.assertValues(emp1, emp2, emp3);
   }
 }

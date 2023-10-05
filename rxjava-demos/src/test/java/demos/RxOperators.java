@@ -46,15 +46,29 @@ public class RxOperators {
   }
 
   @Test
+  public void takeVsFilter() {
+    Observable<Integer> numbers = Observable.just(1, 2, 8, 4, 5, 3, 6, 7, 3, 9);
+    Observable<Integer> takeWhileLessThan5 = numbers.takeWhile(n -> n < 5);
+    Observable<Integer> filterLessThan5 = numbers.filter(n -> n < 5);
+
+    takeWhileLessThan5.test()
+                      .assertValueCount(2);
+    filterLessThan5.test()
+                   .assertValueCount(5);
+  }
+
+  @Test
   public void takeLastTiming() {
     Observable<Long> o1 = Observable.intervalRange(1, 16, 0, 250, TimeUnit.MILLISECONDS);
     Observable<Long> o2 = o1.doOnNext(v -> System.out.printf("At value %d%n", v))
                             .doOnComplete(() -> System.out.println("Finished counting, can now " +
-                                                                       "run takeLast."))
+                                                                     "run takeLast."))
                             .takeLast(4);
-    o2.blockingSubscribe(v -> System.out.printf("One of the last four values: %d%n", v),
-                         err -> System.err.println("Something went wrong, though that's unlikely."),
-                         () -> System.out.println("Finished with o2"));
+    o2.blockingSubscribe(
+      v -> System.out.printf("One of the last four values: %d%n", v),
+      err -> System.err.println("Something went wrong, though that's unlikely."),
+      () -> System.out.println("Finished with o2")
+    );
   }
 
   @Test
@@ -166,7 +180,6 @@ public class RxOperators {
               .map(i -> i * 2)
               .doOnNext(i -> System.out.printf("doOnNext after map%n"))
               .blockingSubscribe(System.out::println);
-
   }
 
   @Test
@@ -188,10 +201,10 @@ public class RxOperators {
     System.out.println("= flatMap(Function f (and others)) operator");
     System.out.println("======================================================");
     Observable<String> a =
-        Observable.just("aardvark", "abscond", "alpha", "apples");
+      Observable.just("aardvark", "abscond", "alpha", "apples");
     Observable<String> b = Observable.just("banana", "bat", "beta", "bottle");
     Observable<String> c =
-        Observable.just("car", "catamaran", "center", "cozy");
+      Observable.just("car", "catamaran", "center", "cozy");
     Map<String, Observable<String>> wordList = new HashMap<>();
 
     // wordList['A'] ---> Observable<String> ["aardvark", "abscond", "alpha", "apples"]
@@ -207,7 +220,8 @@ public class RxOperators {
     // Might interleave, where concatMap will guarantee ordering
     // System.out.printf("*** %s ***%n", key);
     // without flatMap, this would be an Observable of words
-    keys.flatMap(wordList::get) //  ["aardvark", "abscond", "alpha", "apples"], and following
+    keys.flatMap(wordList::get) // ["aardvark", "abscond", "alpha", "apples", "banana", "bat", ...]
+                                // and following
         .subscribe(System.out::println);
   }
 
@@ -218,7 +232,6 @@ public class RxOperators {
                                             .map(x -> x * 2);
     TestObserver<Integer> observer = TestObserver.create();
     numbers.subscribe(observer);
-
   }
 
   @Ignore
@@ -265,8 +278,8 @@ public class RxOperators {
   public void composeExample() {
     String[] a = { "aardvark", "abscond", "alpha", "apples" };
     ObservableTransformer<String, StringBuilder> reverser =
-        strOuter -> strOuter.map(s -> new StringBuilder().append(s)
-                                                         .reverse());
+      strOuter -> strOuter.map(s -> new StringBuilder().append(s)
+                                                       .reverse());
 
     Observable<String> words = Observable.fromArray(a);
     words.map(String::toUpperCase)
@@ -282,7 +295,7 @@ public class RxOperators {
     System.out.println("= compose(ObservableTransformer) operator");
     System.out.println("======================================================");
     ObservableTransformer<String, Integer> convertToInteger =
-        i -> i.map(Integer::parseInt);
+      i -> i.map(Integer::parseInt);
     Observable.just("1", "2", "3")
               // .map(Integer::parseInt)
               .compose(convertToInteger)
@@ -301,11 +314,11 @@ public class RxOperators {
 
     // antenna doesn't map to anything in 'b'.
     Observable<String> a =
-        Observable.just("aardvark", "abscond", "alpha", "apples", "antenna");
+      Observable.just("aardvark", "abscond", "alpha", "apples", "antenna");
     Observable<String> b = Observable.just("banana", "bat", "beta", "bottle");
 
     Observable<String> zipped =
-        Observable.zip(a, b, (a1, b1) -> String.format("%s / %s%n", a1, b1));
+      Observable.zip(a, b, (a1, b1) -> String.format("%s / %s%n", a1, b1));
 
     zipped.subscribe(System.out::print, System.err::println);
   }

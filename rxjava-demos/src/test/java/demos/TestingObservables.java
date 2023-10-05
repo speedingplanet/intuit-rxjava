@@ -68,18 +68,4 @@ public class TestingObservables {
     // testObserver.assertError(someError)
     // testObserver.assertNotComplete(); // Would fail, if assertValues() is true
   }
-
-  @Ignore
-  @Test
-  public void testObservableOneItem() {
-    System.out.println("======================================================");
-    System.out.println("= Testing one item from an Observable");
-    System.out.println("======================================================");
-    Integer first = oList.blockingFirst(); // also blockingLast()
-    assertEquals(first, n[0]);
-
-    // Failing version
-    // assertEquals(Integer.valueOf(20), n[0]);
-  }
-
 }
