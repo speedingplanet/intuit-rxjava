@@ -17,11 +17,10 @@ Working with iterables in our observables, as well as testing them.
 
 Open `Manager`. Update the following:
 
-* Update `getTeam` so it returns an Observable of the individual team members (not a one-element
-  Observable wrapped around the List). 
+* Update `getTeam` so it returns an Observable of the individual team members 
+  * That is, it returns `Observable<Employee>` **NOT** `Observable<List<Employee>>`
 * Open `ManagerTest`. Write a test for:
-  * `getTeam` returning an Observable
-  * Retrieving at least one item out of the `getTeam` observable to verify it is correct.
+  * Retrieving at least one item out of the `getTeam` Observable to verify it is correct.
 
 ### Something to think about
 * What happens if a team member is added or removed? Is that reflected in the
@@ -33,7 +32,7 @@ Open `Manager`. Update the following:
 Use TestObserver to write better tests for Manager. Specifically:
 * Test whether the `getTeam` Observable completed
 * Test whether the `getTeam` Observable had any errors
-* Test whether that Observable returned the right values in the right order
+* Test whether the Observable returned the right values in the right order
 
 ## Part 4
 
